@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": false,
+    "eslint.enable": true,
+    "eslint.autoFixOnSave": true,
+    "java.configuration.updateBuildConfiguration": "interactive",
+}
