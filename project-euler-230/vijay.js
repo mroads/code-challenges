@@ -4,8 +4,10 @@ const BigNumber = require('bignumber.js');
 
 /**
  *
-1
-1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 8214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196 210
+2
+1415926535 8979323846 35
+1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 8214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196 104683731294243150
+
 */
 
 let iterationValues = [];
@@ -16,52 +18,67 @@ function calculateDifference(val1, val2) {
 }
 
 
-function findIteration(n, A, B) {
+function findIteration(n, A, B, iteration) {
   const AB = A + B;
-  if (n <= AB.length) {
-    return AB[n - 1];
+
+  // console.info('iteration', n, A, B, iteration);
+
+
+  if (iteration === 2 && n <= AB.length) {
+    // console.info('match found', iteration, n, AB);
+    return AB[n > 0 ? n - 1 : n];
   }
 
-  for (let i = 0; i < iterationValues.length; i++) {
-    if (iterationValues[i].minus(n) >= 0) {
-      // console.info('n, iterationValues[i - 1]', n, iterationValues[i - 1], i);
-      const difference = calculateDifference(n, iterationValues[i - 1]);
-      return findIteration(difference, A, B, false);
+
+  for (let i = iteration; i > 0; i--) {
+    // console.info('find me', iterationValues[i], n);
+    if (n.minus(iterationValues[i]) > 0) {
+      const difference = n.minus(iterationValues[i]);
+      // console.info('n, iterationValues[i]', n, iterationValues[i], i, difference);
+      return findIteration(difference, A, B, i);
     }
   }
-  return 0;
+
+  if (n < B.length) {
+    // console.info('match found', iteration, n, AB);
+    return B[n > 0 ? n - 1 : n];
+  } if (n < AB.length) {
+    // console.info('match found', iteration, n, AB);
+    return AB[n > 0 ? n - 1 : n];
+  }
+  // return B[n - 1];
 }
 
 
 function processData(input) {
   // Enter your code here
   const { q, data } = extractData(input);
-  // console.info('q,data', q, data);
+  // console.info('q,data', q, data.length);
   data.forEach((line) => {
+    // console.info('line', line);
     iterationValues = [];
     const { A, B, n } = line;
     let prev1Length = new BigNumber(A.length);
     let prev2Length = new BigNumber(B.length);
-    let i = 0;
+    iterationValues.push(prev2Length);
     while (true) {
       try {
         const temp = prev2Length;
         prev2Length = prev1Length.plus(prev2Length);
         prev1Length = temp;
-        iterationValues[i] = prev2Length;
-        if (prev2Length.minus(n) >= 0) {
+        iterationValues.push(prev2Length);
+        if (prev2Length.minus(n) > 0) {
           break;
         }
       } catch (e) {
-        console.warn(e, i);
+        console.warn(e);
         break;
       }
-      i++;
     }
 
-    // console.info('iterationValues', iterationValues, prev2Length >= n);
+    // console.info('iterationValues', iterationValues, iterationValues.length - 1);
 
-    const value = findIteration(n, A, B, true);
+    const value = findIteration(n, A, B, iterationValues.length - 1);
 
     console.info(value);
   });
@@ -110,3 +127,6 @@ process.stdin.on('data', (input) => {
 process.stdin.on('end', () => {
   processData(_input);
 });
+
+
+// processData('1\n1415926535 8979323846 20');
