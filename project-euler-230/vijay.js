@@ -1,69 +1,69 @@
+const BigNumber = require('bignumber.js');
+
 /* eslint-disable no-underscore-dangle */
 
 /**
  *
-2
-1415926535 8979323846 35
-1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 8214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196 104683731294243150
- */
+1
+1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 8214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196 210
+*/
+
+let iterationValues = [];
+
+
+function calculateDifference(val1, val2) {
+  return new BigNumber(`${val1}`).minus(val2);
+}
+
+
+function findIteration(n, A, B) {
+  const AB = A + B;
+  if (n <= AB.length) {
+    return AB[n - 1];
+  }
+
+  for (let i = 0; i < iterationValues.length; i++) {
+    if (iterationValues[i].minus(n) >= 0) {
+      // console.info('n, iterationValues[i - 1]', n, iterationValues[i - 1], i);
+      const difference = calculateDifference(n, iterationValues[i - 1]);
+      return findIteration(difference, A, B, false);
+    }
+  }
+  return 0;
+}
+
+
 function processData(input) {
   // Enter your code here
   const { q, data } = extractData(input);
-  console.info('q,data', q, data);
+  // console.info('q,data', q, data);
   data.forEach((line) => {
+    iterationValues = [];
     const { A, B, n } = line;
-    console.info('line length', A.length, B.length, n);
-    let prev1Length = A.length;
-    let prev2Length = B.length;
-    const prev1 = 'A';
-    const prev2 = 'B';
+    let prev1Length = new BigNumber(A.length);
+    let prev2Length = new BigNumber(B.length);
     let i = 0;
-    const iterationValues = [];
     while (true) {
       try {
         const temp = prev2Length;
-        prev2Length = prev1Length + prev2Length;
+        prev2Length = prev1Length.plus(prev2Length);
         prev1Length = temp;
-        // const temp2 = prev2;
-        // prev2 = `${prev1}+${prev2}`;
-        // prev1 = temp2;
-        console.info('prev1Length,prev2Length', prev1Length, prev2Length, n);
-        if (prev2Length >= n) {
+        iterationValues[i] = prev2Length;
+        if (prev2Length.minus(n) >= 0) {
           break;
         }
       } catch (e) {
         console.warn(e, i);
         break;
       }
-      iterationValues[i] = prev2Length;
       i++;
     }
 
-    // const result = prev2.split('+');
-    // let length = 0;
-    // let value = '';
-    // for (i = 0; i < result.length; i++) {
-    //   if (result[i] === 'A') {
-    //     length += A.length;
-    //     value = A;
-    //   } else {
-    //     length += B.length;
-    //     value = B;
-    //   }
-    //   if (length > n) {
-    //     break;
-    //   }
-    // }
+    // console.info('iterationValues', iterationValues, prev2Length >= n);
 
-    const difference = prev2Length - n;
+    const value = findIteration(n, A, B, true);
 
-
-    for (let j = 0; j < iterationValues.length; j++) {
-      if (iterationValues[j] > difference) {
-        console.info('find me', prev2Length, i, n, j);
-        break;
-      }
-    }
+    console.info(value);
   });
 }
 
@@ -86,7 +86,7 @@ function extractData(input) {
       // ABn
       const A = query[0];
       const B = query[1];
-      const n = query[2];
+      const n = new BigNumber(query[2]);
       data.push({
         A,
         B,
