@@ -5,37 +5,28 @@ const BigNumber = require('bignumber.js');
 /**
  *
 1
-1415926535 8979323846 21
+1415926535 8979323846 0
 1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679 8214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196 104683731294243150
-
 */
 
 let iterationValues = [];
 
 
-function findIteration(n, A, B, iteration) {
-  // console.info('iteration', n, A, B, iteration);
-
-
-  for (let i = iteration; i >= 0; i -= 2) {
-    // console.info('find me', iterationValues[i], n, i);
-    if (n.minus(iterationValues[i]) > 0) {
-      const difference = n.minus(iterationValues[i]);
-      // console.info('difference', i, iterationValues[i]);
-      if (i > 0 && difference.minus(iterationValues[i - 1]) > 0) {
-        // console.info('in second part', difference.minus(iterationValues[i - 1]));
-        return findIteration(difference.minus(iterationValues[i - 1]), A, B, i);
-      }
-      // console.info('in first part', difference.minus(iterationValues[i - 1]));
-
-      return findIteration(difference, A, B, i - 1);
-    }
+function solution(n, A, B, iteration) {
+  // console.info('solution', n, A, B, iteration);
+  if (iteration === 0) {
+    return A[n - 1];
   }
-
-  if (iteration % 2 === 0) {
-    return A[n > 0 ? n - 1 : n];
+  if (iteration === 1) {
+    return B[n - 1];
   }
-  return B[n > 0 ? n - 1 : n];
+  const firstPart = iterationValues[iteration - 2];
+  // const secondPart = iterationValues[iteration - 1];
+  const difference = n.minus(firstPart);
+  if (difference > 0) {
+    return solution(difference, A, B, iteration - 1);
+  }
+  return solution(n, A, B, iteration - 2);
 }
 
 
@@ -82,10 +73,10 @@ function processData(input) {
       }
     }
 
-    // console.info('iterationValues', iterationValues.length - 1, n.minus(prev1Length));
+    // console.info('iterationValues', iterationValues.length - 1, iterationValues);
 
 
-    const value = findIteration(n, A, B, iterationValues.length - 1);
+    const value = solution(n, A, B, iterationValues.length - 1);
     console.info(value);
   }
 }
@@ -101,10 +92,8 @@ function extractData(input) {
   const q = new Number(inputLines[0]);
   const data = [];
   for (let i = 1; i <= q; i++) {
-    const query = inputLines[i].split(' ');
-    if (query.length < 3) {
-      break;
-    } else {
+    const query = inputLines[i].trim().split(' ');
+    if (query.length === 3) {
       // ABn
       const A = query[0];
       const B = query[1];
